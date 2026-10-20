@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"><meta name="googlebot" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Vận chuyển HSK 09–20/10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* Layout: thanh lọc dính trên cùng → dải 12 trạng thái → 2 ma trận nhiệt → 2 biểu đồ cột → bảng chi tiết */
+:root{
+  color-scheme: light;
+  --plane:#f7f7f4; --surface:#fcfcfb; --surface-2:#f2f2ed;
+  --ink:#0b0b0b; --ink-2:#52514e; --ink-3:#898781;
+  --grid:#e4e3dc; --rule:#d7d6cd;
+  --accent:#184f95;
+  --s1:#2a78d6; --s2:#eb6834;
+  --crit:#d03b3b; --good:#0ca30c; --warn:#fab219;
+  /* ramp tuần tự 1 sắc xanh: nhạt = ít, đậm = nhiều */
+  --h0:#f2f2ed; --h1:#cde2fb; --h2:#9ec5f4; --h3:#6da7ec;
+  --h4:#3987e5; --h5:#256abf; --h6:#184f95; --h7:#0d366b;
+  --heat-ink-hi:#fcfcfb; --heat-ink-lo:#0b0b0b;
+  --shadow:0 1px 2px rgba(11,11,11,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232321;
+    --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#898781;
+    --grid:#2c2c2a; --rule:#383835;
+    --accent:#86b6ef;
+    --s1:#3987e5; --s2:#d95926;
+    --crit:#d03b3b; --good:#0ca30c; --warn:#fab219;
+    --h0:#232321; --h1:#0d366b; --h2:#184f95; --h3:#256abf;
+    --h4:#3987e5; --h5:#6da7ec; --h6:#9ec5f4; --h7:#cde2fb;
+    --heat-ink-hi:#0b0b0b; --heat-ink-lo:#f0efec;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232321;
+  --ink:#f0efec; --ink-2:#c3c2b7; --ink-3:#898781;
+  --grid:#2c2c2a; --rule:#383835;
+  --accent:#86b6ef;
+  --s1:#3987e5; --s2:#d95926;
+  --crit:#d03b3b; --good:#0ca30c; --warn:#fab219;
+  --h0:#232321; --h1:#0d366b; --h2:#184f95; --h3:#256abf;
+  --h4:#3987e5; --h5:#6da7ec; --h6:#9ec5f4; --h7:#cde2fb;
+  --heat-ink-hi:#0b0b0b; --heat-ink-lo:#f0efec;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--plane); color:var(--ink);
+  font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:14px; line-height:1.5; margin:0;
+}
+.wrap{max-width:1280px; margin:0 auto; padding-inline:16px; padding-block:0 48px}
+
+header{padding-block:28px 18px; border-bottom:1px solid var(--rule)}
+h1{font-size:clamp(21px,3.4vw,27px); font-weight:700; letter-spacing:-.015em; margin:0 0 6px; text-wrap:balance}
+.sub{color:var(--ink-2); font-size:13px; margin:0; max-width:68ch}
+.src{color:var(--ink-3); font-size:12px; margin:8px 0 0; font-variant-numeric:tabular-nums}
+
+.bar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:var(--plane); border-bottom:1px solid var(--rule);
+  padding-block:10px; margin-bottom:22px;
+  display:flex; flex-wrap:wrap; gap:14px 22px; align-items:flex-end;
+}
+.fgroup{display:flex; flex-direction:column; gap:5px; min-width:0}
+.flab{font-size:10.5px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.chips{display:flex; flex-wrap:wrap; gap:5px}
+.chip{
+  font:inherit; font-size:12.5px; font-weight:500; color:var(--ink-2);
+  background:var(--surface); border:1px solid var(--rule); border-radius:6px;
+  padding:5px 11px; cursor:pointer; white-space:nowrap;
+  font-variant-numeric:tabular-nums; transition:background .12s,border-color .12s,color .12s;
+}
+.chip:hover{background:var(--surface-2)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--surface); font-weight:600}
+.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* headline */
+.head3{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1px; background:var(--rule);
+  border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin-bottom:18px}
+.head3 div{background:var(--surface); padding:14px 16px 15px}
+.head3 .k{font-size:10.5px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); display:block; margin-bottom:7px}
+.head3 .v{font-size:26px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; display:block; line-height:1.1}
+.head3 .d{font-size:12px; color:var(--ink-2); margin-top:4px; display:block}
+
+/* status strip: 12 trạng thái tách riêng */
+.strip{display:grid; grid-template-columns:repeat(auto-fit,minmax(142px,1fr)); gap:1px; background:var(--rule);
+  border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin-bottom:26px}
+.st{background:var(--surface); padding:11px 13px 12px; min-width:0}
+.st .n{font-size:11.5px; font-weight:600; color:var(--ink-2); display:block; margin-bottom:5px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.st .v{font-size:19px; font-weight:600; font-variant-numeric:tabular-nums; display:block; line-height:1.15}
+.st .p{font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.st .track{height:3px; background:var(--grid); border-radius:2px; margin-top:7px; overflow:hidden}
+.st .fill{height:100%; background:var(--s1); border-radius:2px}
+.st.zero .v,.st.zero .p{color:var(--ink-3)}
+
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); gap:16px; margin-bottom:16px}
+.panel{background:var(--surface); border:1px solid var(--rule); border-radius:10px; padding:16px 18px 18px; box-shadow:var(--shadow); min-width:0}
+.panel h2{font-size:14.5px; font-weight:600; margin:0 0 3px; letter-spacing:-.01em}
+.panel .note{font-size:12px; color:var(--ink-3); margin:0 0 14px}
+.cbox{position:relative; height:300px}
+.cbox.tall{height:420px}
+
+/* heatmap */
+.hmwrap{overflow-x:auto}
+table.hm{border-collapse:separate; border-spacing:2px; font-size:12px; font-variant-numeric:tabular-nums}
+table.hm th{font-size:10.5px; font-weight:600; letter-spacing:.04em; color:var(--ink-3); padding:3px 6px; text-align:right; white-space:nowrap}
+table.hm th.rowh{text-align:left; color:var(--ink-2); font-size:12px; font-weight:500; padding-right:10px; position:sticky; left:0; background:var(--surface); z-index:1}
+table.hm td{padding:7px 9px; text-align:right; border-radius:4px; min-width:58px; white-space:nowrap; cursor:default}
+.ramp{display:flex; align-items:center; gap:7px; margin-top:13px; font-size:11.5px; color:var(--ink-3)}
+.ramp .cells{display:flex; gap:2px}
+.ramp i{width:17px; height:11px; border-radius:2px; display:block}
+
+/* select */
+select{
+  font:inherit; font-size:12.5px; font-weight:500; color:var(--ink-2); background:var(--surface);
+  border:1px solid var(--rule); border-radius:6px; padding:5px 9px; cursor:pointer; max-width:100%;
+}
+select:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.tablewrap{overflow-x:auto; border:1px solid var(--rule); border-radius:8px; background:var(--surface)}
+table.dt{border-collapse:collapse; width:100%; font-size:12.5px; font-variant-numeric:tabular-nums}
+table.dt th,table.dt td{padding:7px 10px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--grid)}
+table.dt th{font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); background:var(--surface-2); position:sticky; top:0}
+table.dt th:first-child,table.dt td:first-child,table.dt th:nth-child(2),table.dt td:nth-child(2){text-align:left}
+table.dt tbody tr:hover td{background:var(--surface-2)}
+table.dt tfoot td{font-weight:700; border-top:2px solid var(--rule); border-bottom:none; background:var(--surface-2)}
+.muted{color:var(--ink-3)}
+
+.notes{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; margin-top:26px}
+.card{background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--warn); border-radius:8px; padding:14px 16px}
+.card.crit{border-left-color:var(--crit)}
+.card h3{font-size:13px; font-weight:600; margin:0 0 6px; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.card p{margin:0; font-size:12.5px; color:var(--ink-2)}
+.card p + p{margin-top:7px}
+.tag{font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; padding:2px 6px; border-radius:4px; background:var(--surface-2); color:var(--ink-3); border:1px solid var(--rule)}
+footer{margin-top:30px; padding-top:16px; border-top:1px solid var(--rule); color:var(--ink-3); font-size:12px}
+@media (max-width:520px){ .cbox{height:265px} .cbox.tall{height:380px} .head3 .v{font-size:22px} }
+@media (prefers-reduced-motion: reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+
+
+
+<div class="wrap">
+  <header>
+    <h1>Vận chuyển HSK 09–20/10</h1>
+    <p class="sub">16 trạng thái shipment theo ngày tạo đơn và đơn vị vận chuyển, 12 ngày 09–20/10. Chỉ <em>completed</em> và <em>delivered</em> được gộp thành “Hoàn tất”; các trạng thái còn lại để riêng. Đơn vị đếm: 1 dòng = 1 mã shipment.</p>
+    <p class="src" id="src"></p>
+  </header>
+
+  <div class="bar">
+    <div class="fgroup">
+      <span class="flab" id="lab-day">Ngày tạo đơn</span>
+      <div class="chips" id="f-day" role="group" aria-labelledby="lab-day"></div>
+    </div>
+    <div class="fgroup">
+      <span class="flab" id="lab-nvc">Đơn vị vận chuyển</span>
+      <div class="chips" id="f-nvc" role="group" aria-labelledby="lab-nvc"></div>
+    </div>
+  </div>
+
+  <div class="head3" id="head3"></div>
+  <div class="strip" id="strip"></div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Ngày tạo đơn × trạng thái</h2>
+      <p class="note" id="n1"></p>
+      <div class="hmwrap"><table class="hm" id="hm1"></table></div>
+      <div class="ramp"><span>Ít</span><span class="cells" id="r1"></span><span>Nhiều</span><span style="margin-left:6px">· số trong ô là số shipment</span></div>
+    </section>
+
+    <section class="panel">
+      <h2>Đơn vị vận chuyển × trạng thái</h2>
+      <p class="note" id="n2"></p>
+      <div class="hmwrap"><table class="hm" id="hm2"></table></div>
+      <div class="ramp"><span>Ít</span><span class="cells" id="r2"></span><span>Nhiều</span><span style="margin-left:6px">· số trong ô là số shipment</span></div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Tỷ lệ đã gán mã vận đơn</h2>
+      <p class="note">Phần trăm shipment đã có mã vận đơn tại thời điểm export. Tỷ lệ thấp chủ yếu do đơn còn ở khâu kho, chưa bàn giao — không đọc là đơn vị vận chuyển chậm.</p>
+      <div class="cbox"><canvas id="c3"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>Cửa hàng theo trạng thái</h2>
+      <p class="note" style="margin-bottom:10px">15 cửa hàng có nhiều shipment nhất ở trạng thái được chọn. Đây là dấu hiệu để kiểm tra, chưa phải kết luận về cửa hàng.</p>
+      <div style="margin-bottom:12px">
+        <label for="selStatus" class="flab" style="display:block;margin-bottom:5px">Trạng thái</label>
+        <select id="selStatus"></select>
+      </div>
+      <div class="cbox tall"><canvas id="c4"></canvas></div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-bottom:16px">
+    <h2>Lý do trễ của đơn đang ở trạng thái <em>processing</em></h2>
+    <p class="note" id="np"></p>
+    <div class="strip" id="stripP" style="margin-bottom:18px"></div>
+    <div class="grid" style="margin-bottom:0">
+      <div style="min-width:0">
+        <h3 style="font-size:13px;font-weight:600;margin:0 0 10px">Ngày tạo đơn × lý do trễ</h3>
+        <div class="hmwrap"><table class="hm" id="hmP1"></table></div>
+      </div>
+      <div style="min-width:0">
+        <h3 style="font-size:13px;font-weight:600;margin:0 0 10px">Đơn vị vận chuyển × lý do trễ</h3>
+        <div class="hmwrap"><table class="hm" id="hmP2"></table></div>
+      </div>
+    </div>
+    <div class="grid" style="margin-top:16px;margin-bottom:0">
+      <div style="min-width:0">
+        <h3 style="font-size:13px;font-weight:600;margin:0 0 10px">Số ngày tồn × lý do trễ</h3>
+        <p class="note" style="margin-bottom:10px">Số ngày tồn = ngày export trừ ngày <em>tạo</em> đơn, không phải thời gian đứng yên ở processing. Bảng này không đổi theo bộ lọc.</p>
+        <div class="hmwrap"><table class="hm" id="hmP3"></table></div>
+      </div>
+      <div style="min-width:0">
+        <h3 style="font-size:13px;font-weight:600;margin:0 0 10px">15 cửa hàng nhiều đơn processing nhất × lý do trễ</h3>
+        <p class="note" style="margin-bottom:10px">Dấu hiệu để kiểm tra, chưa phải đánh giá cửa hàng — cửa hàng lớn tự nhiên có nhiều đơn hơn.</p>
+        <div class="hmwrap"><table class="hm" id="hmP4"></table></div>
+      </div>
+    </div>
+    <div class="ramp"><span>Ít</span><span class="cells" id="rP"></span><span>Nhiều</span><span style="margin-left:6px">· số trong ô là số đơn processing</span></div>
+    <p class="note" style="margin-top:14px"><strong>“Không” không có nghĩa là đơn không trễ</strong> — đó là giá trị mặc định khi chưa ai gắn lý do. Đơn vẫn đang đứng ở processing.</p>
+  </section>
+
+  <section class="panel" style="margin-bottom:16px">
+    <h2>Bảng chi tiết: ngày × đơn vị vận chuyển × trạng thái</h2>
+    <p class="note" id="n5"></p>
+    <div class="tablewrap">
+      <table class="dt" id="tbl">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+        <tfoot id="tfoot"></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Lý do hủy</h2>
+      <p class="note" id="n6"></p>
+      <div class="cbox"><canvas id="c5"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2>Lý do trễ ghi nhận trong hệ thống</h2>
+      <p class="note">Trường này phản ánh khâu trước vận chuyển (chờ xác nhận, chờ hủy), không phải lý do giao hàng trễ của đơn vị vận chuyển. Giá trị “Không” đã được loại khỏi biểu đồ.</p>
+      <div class="cbox"><canvas id="c6"></canvas></div>
+    </section>
+  </div>
+
+  <div class="notes">
+    <div class="card crit">
+      <h3><span class="tag">Cần kiểm tra</span> Đơn chờ hủy đứng yên qua ba mốc</h3>
+      <p><em>Chờ hủy đơn</em>: 1.231 → 1.132 → <strong>1.138 đơn</strong>. Trong khi các nhóm lý do khác luân chuyển bình thường, nhóm này không được giải. Đơn tạo 10/10 còn 604 đơn processing thì 452 là chờ hủy (74,8%).</p>
+      <p>Nhóm đơn cũ nhất (tạo 09/10, tồn 11 ngày) còn 128 đơn, 127 trong đó là chờ hủy. Chuỗi qua bảy mốc: 157 → 164 → 279 → 273 → 154 → 128 → 127.</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag">Cần xác nhận</span> Độ ưu tiên không khớp đơn vị vận chuyển</h3>
+      <p id="n7"></p>
+      <p>Có shipment mang Độ ưu tiên <em>GHN</em> nhưng đơn vị vận chuyển là Hasaki Now. Cần xác nhận ý nghĩa từng giá trị trước khi dùng làm tiêu chí đánh giá.</p>
+    </div>
+    <div class="card crit">
+      <h3><span class="tag">Cần kiểm tra</span> Hàng hoàn vẫn tăng</h3>
+      <p><em>on-return</em> tăng tiếp 619 → <strong>867 đơn</strong> (+40,1%), nguồn chính là 324 đơn chuyển từ <em>shipping</em>. Vẫn tập trung ở đơn ngày 10/10 (738/867). Làn sóng hoàn hàng chưa dừng.</p>
+      <p>755 shipment vẫn trống đơn vị vận chuyển (722 tồn từ mốc trước) — kỳ thứ sáu liên tiếp chỉ tăng. Bốn nhóm bất thường còn lại đều thấp nhất từ trước đến nay: 87 đổi ĐVVC, 323 mất mã vận đơn, 279 chuyển lùi, 22 đổi mã.</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag">Hạn chế</span> Không đo được thời gian tồn ở mỗi trạng thái</h3>
+      <p>File không có cột ngày chuyển trạng thái hay ngày bàn giao cho đơn vị vận chuyển. Một đơn <em>processing</em> từ 08/10 và một đơn tạo sáng 12/10 nằm chung một ô. Số liệu ở đây là ảnh chụp trạng thái, không phải thời gian xử lý.</p>
+    </div>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script id="payload" type="application/json">{"meta":{"export":"20/10/2026 09:01","don":220322,"shop":357,"file":"9-20 HSK_2026_10_20_09_01_06.xlsx","tong":225738},"days":["09/10","10/10","11/10","12/10","13/10","14/10","15/10","16/10","17/10","18/10","19/10","20/10"],"nvc":["Hasaki Now","Giao Hang Nhanh","Shopee Express","Hasaki Pickup","TMS Easy Post","TMS Easy Ship","Hasaki TMS Internal","Hasaki TMS Gateway","(khong co NVC)"],"status":["Hoàn tất","canceled","shipping","processing","packed","on-return","ready-to-ship","picked","picking","returned","packing","pending","waiting-claim","lost","return-fail"],"cell":[{"d":"09/10","v":"Hasaki Now","s":[7351,4059,12,127,14,0,0,0,0,2,0,0,0,0,0],"ma":7380,"t":3932593600.0,"sku":33534},{"d":"09/10","v":"Giao Hang Nhanh","s":[2209,700,16,1,1,22,0,0,1,11,0,0,1,0,0],"ma":2259,"t":1096965000.0,"sku":8352},{"d":"09/10","v":"Shopee Express","s":[1718,685,12,0,2,12,0,0,1,0,0,0,2,0,0],"ma":1746,"t":873294800.0,"sku":6705},{"d":"09/10","v":"Hasaki Pickup","s":[140,3,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":121806000.0,"sku":601},{"d":"09/10","v":"TMS Easy Post","s":[21,1,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":21,"t":899.7900000000001,"sku":78},{"d":"09/10","v":"TMS Easy Ship","s":[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":1,"t":92.49000000000001,"sku":13},{"d":"09/10","v":"Hasaki TMS Internal","s":[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":2,"t":71.45,"sku":7},{"d":"09/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"09/10","v":"(khong co NVC)","s":[67,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":2749.85,"sku":203},{"d":"10/10","v":"Hasaki Now","s":[34760,11145,438,442,77,0,26,1,0,10,0,1,0,0,0],"ma":35312,"t":11978826400.0,"sku":126211},{"d":"10/10","v":"Giao Hang Nhanh","s":[33737,7729,915,69,83,506,1,2,7,42,1,1,5,1,1],"ma":35301,"t":11821747200.0,"sku":121998},{"d":"10/10","v":"Shopee Express","s":[25149,7429,1043,92,143,232,16,4,19,36,0,6,5,0,0],"ma":26627,"t":9254333700.0,"sku":99511},{"d":"10/10","v":"Hasaki Pickup","s":[365,179,0,1,11,0,0,0,0,0,0,1,0,0,0],"ma":11,"t":368569600.0,"sku":2767},{"d":"10/10","v":"TMS Easy Post","s":[31,2,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":31,"t":1209.3300000000002,"sku":146},{"d":"10/10","v":"TMS Easy Ship","s":[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":3,"t":210.96,"sku":5},{"d":"10/10","v":"Hasaki TMS Internal","s":[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":2,"t":36.03,"sku":4},{"d":"10/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"10/10","v":"(khong co NVC)","s":[54,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":1789.0499999999997,"sku":146},{"d":"11/10","v":"Hasaki Now","s":[3939,1404,37,67,14,0,1,0,0,4,0,0,0,0,0],"ma":3995,"t":1715126000.0,"sku":10001},{"d":"11/10","v":"Giao Hang Nhanh","s":[1608,392,61,5,0,28,0,0,0,2,0,0,0,0,0],"ma":1699,"t":659143500.0,"sku":4240},{"d":"11/10","v":"Shopee Express","s":[1486,446,65,8,11,11,0,0,4,2,0,0,0,0,0],"ma":1575,"t":669699000.0,"sku":4188},{"d":"11/10","v":"Hasaki Pickup","s":[135,1,0,1,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":151734000.0,"sku":700},{"d":"11/10","v":"TMS Easy Post","s":[25,1,1,0,0,0,0,0,0,0,0,0,0,0,0],"ma":26,"t":919.0300000000001,"sku":87},{"d":"11/10","v":"TMS Easy Ship","s":[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":3,"t":173.98000000000002,"sku":7},{"d":"11/10","v":"Hasaki TMS Internal","s":[6,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":6,"t":156.65,"sku":20},{"d":"11/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"11/10","v":"(khong co NVC)","s":[80,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":3695.1,"sku":303},{"d":"12/10","v":"Hasaki Now","s":[2783,856,40,46,4,0,5,0,0,2,0,0,0,0,0],"ma":2833,"t":1176651700.0,"sku":8109},{"d":"12/10","v":"Giao Hang Nhanh","s":[921,186,35,3,0,12,0,0,0,1,0,0,0,0,0],"ma":959,"t":389026000.0,"sku":2762},{"d":"12/10","v":"Shopee Express","s":[700,183,34,14,8,6,0,0,0,2,0,0,0,0,0],"ma":749,"t":302752000.0,"sku":2082},{"d":"12/10","v":"Hasaki Pickup","s":[89,1,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":87387000.0,"sku":462},{"d":"12/10","v":"TMS Easy Post","s":[37,0,2,0,0,0,0,0,0,0,0,0,0,0,0],"ma":39,"t":1592.56,"sku":149},{"d":"12/10","v":"TMS Easy Ship","s":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":1,"t":41.15,"sku":1},{"d":"12/10","v":"Hasaki TMS Internal","s":[6,1,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":6,"t":263.39000000000004,"sku":25},{"d":"12/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"12/10","v":"(khong co NVC)","s":[82,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":3410.64,"sku":277},{"d":"13/10","v":"Hasaki Now","s":[3917,1252,53,42,6,0,7,0,1,0,0,0,0,0,0],"ma":3984,"t":1743567000.0,"sku":11633},{"d":"13/10","v":"Giao Hang Nhanh","s":[2249,264,95,9,8,20,0,1,1,0,0,0,0,0,0],"ma":2373,"t":514284400.0,"sku":13715},{"d":"13/10","v":"Shopee Express","s":[1710,277,119,20,26,5,5,0,0,1,0,0,0,0,0],"ma":1866,"t":429725900.0,"sku":11446},{"d":"13/10","v":"Hasaki Pickup","s":[96,1,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":1,"t":576366000.0,"sku":445},{"d":"13/10","v":"TMS Easy Post","s":[30,2,3,0,0,0,0,0,0,0,0,0,0,0,0],"ma":33,"t":1169.8,"sku":121},{"d":"13/10","v":"TMS Easy Ship","s":[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":2,"t":76.1,"sku":5},{"d":"13/10","v":"Hasaki TMS Internal","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"13/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"13/10","v":"(khong co NVC)","s":[66,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":1962.4400000000003,"sku":158},{"d":"14/10","v":"Hasaki Now","s":[5557,1681,117,87,16,0,18,0,0,2,0,0,0,0,0],"ma":5711,"t":2567914000.0,"sku":19942},{"d":"14/10","v":"Giao Hang Nhanh","s":[1238,218,123,10,4,7,0,0,0,0,0,0,0,0,0],"ma":1372,"t":540808000.0,"sku":3707},{"d":"14/10","v":"Shopee Express","s":[1049,230,162,19,24,2,0,0,0,0,0,0,0,0,0],"ma":1237,"t":474640000.0,"sku":3455},{"d":"14/10","v":"Hasaki Pickup","s":[117,2,0,0,1,0,0,0,0,0,0,0,0,0,0],"ma":5,"t":976898000.0,"sku":488},{"d":"14/10","v":"TMS Easy Post","s":[23,0,3,0,0,0,0,0,0,0,0,0,0,0,0],"ma":26,"t":879.3200000000002,"sku":105},{"d":"14/10","v":"TMS Easy Ship","s":[6,0,2,0,0,0,0,0,0,0,0,0,0,0,0],"ma":8,"t":357.89,"sku":35},{"d":"14/10","v":"Hasaki TMS Internal","s":[2,0,1,0,0,0,0,0,0,0,0,0,0,0,0],"ma":3,"t":54.040000000000006,"sku":6},{"d":"14/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"14/10","v":"(khong co NVC)","s":[58,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":1747.98,"sku":147},{"d":"15/10","v":"Hasaki Now","s":[7680,1973,190,114,46,0,10,0,0,5,0,0,0,0,0],"ma":7931,"t":3187763000.0,"sku":23933},{"d":"15/10","v":"Giao Hang Nhanh","s":[1306,369,167,8,10,0,0,0,0,0,0,0,0,0,0],"ma":1482,"t":642003000.0,"sku":4598},{"d":"15/10","v":"Shopee Express","s":[1121,440,211,16,49,3,1,0,0,0,0,0,0,0,0],"ma":1384,"t":626460000.0,"sku":4522},{"d":"15/10","v":"Hasaki Pickup","s":[128,0,0,0,3,0,0,0,0,0,0,0,0,0,0],"ma":3,"t":131864000.0,"sku":709},{"d":"15/10","v":"TMS Easy Post","s":[18,0,7,0,0,0,0,0,0,0,0,0,0,0,0],"ma":25,"t":865.8299999999999,"sku":96},{"d":"15/10","v":"TMS Easy Ship","s":[15,0,3,0,0,0,0,0,0,0,0,0,0,0,0],"ma":18,"t":1832.39,"sku":130},{"d":"15/10","v":"Hasaki TMS Internal","s":[6,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":6,"t":328.54019999999997,"sku":28},{"d":"15/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"15/10","v":"(khong co NVC)","s":[54,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":1700.3199999999997,"sku":138},{"d":"16/10","v":"Hasaki Now","s":[4265,894,110,86,35,0,6,1,0,3,0,0,0,0,0],"ma":4419,"t":1727726500.0,"sku":13484},{"d":"16/10","v":"Giao Hang Nhanh","s":[726,128,167,14,14,0,0,0,1,0,0,0,0,0,0],"ma":908,"t":334372000.0,"sku":3422},{"d":"16/10","v":"Shopee Express","s":[648,150,191,4,33,0,0,0,1,0,0,0,0,0,0],"ma":872,"t":330911500.0,"sku":3249},{"d":"16/10","v":"Hasaki Pickup","s":[95,5,0,0,2,0,2,0,0,0,0,0,0,0,0],"ma":4,"t":104991000.0,"sku":482},{"d":"16/10","v":"TMS Easy Post","s":[8,0,18,0,0,0,0,0,0,0,0,0,0,0,0],"ma":26,"t":772.11,"sku":97},{"d":"16/10","v":"TMS Easy Ship","s":[6,1,7,0,1,0,0,0,0,0,0,0,0,0,0],"ma":14,"t":614.73,"sku":58},{"d":"16/10","v":"Hasaki TMS Internal","s":[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":3,"t":327.40999999999997,"sku":6},{"d":"16/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"16/10","v":"(khong co NVC)","s":[51,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":1977.01,"sku":153},{"d":"17/10","v":"Hasaki Now","s":[3952,624,229,69,90,0,31,0,1,0,0,1,0,0,0],"ma":4302,"t":1491083800.0,"sku":14444},{"d":"17/10","v":"Giao Hang Nhanh","s":[475,134,363,9,29,0,0,0,1,0,0,0,0,0,0],"ma":866,"t":353058400.0,"sku":3324},{"d":"17/10","v":"Shopee Express","s":[730,169,392,16,82,1,0,0,3,0,0,0,0,0,0],"ma":1205,"t":313258000.0,"sku":6412},{"d":"17/10","v":"Hasaki Pickup","s":[150,2,0,0,1,0,0,0,0,0,0,0,0,0,0],"ma":2,"t":824010800.0,"sku":777},{"d":"17/10","v":"TMS Easy Post","s":[1,4,16,0,0,0,0,0,0,0,0,0,0,0,0],"ma":17,"t":685.78,"sku":72},{"d":"17/10","v":"TMS Easy Ship","s":[4,1,13,0,0,0,0,0,0,0,0,0,0,0,0],"ma":17,"t":1039.84,"sku":107},{"d":"17/10","v":"Hasaki TMS Internal","s":[1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],"ma":2,"t":63.37,"sku":3},{"d":"17/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"17/10","v":"(khong co NVC)","s":[71,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":2298.5500000000006,"sku":186},{"d":"18/10","v":"Hasaki Now","s":[3801,588,342,73,176,0,43,10,2,5,1,0,0,0,0],"ma":4381,"t":1460347000.0,"sku":15172},{"d":"18/10","v":"Giao Hang Nhanh","s":[209,124,694,53,95,0,2,0,1,0,0,0,0,0,0],"ma":1000,"t":337699000.0,"sku":3898},{"d":"18/10","v":"Shopee Express","s":[465,117,704,61,131,0,2,0,4,0,0,0,0,0,0],"ma":1303,"t":304808000.0,"sku":7597},{"d":"18/10","v":"Hasaki Pickup","s":[139,7,0,0,3,0,0,0,0,0,0,0,0,0,0],"ma":3,"t":151442000.0,"sku":826},{"d":"18/10","v":"TMS Easy Post","s":[0,1,15,3,2,0,0,0,0,0,0,0,0,0,0],"ma":20,"t":730.4700000000001,"sku":106},{"d":"18/10","v":"TMS Easy Ship","s":[0,1,29,1,0,0,0,0,0,0,0,0,0,0,0],"ma":30,"t":2231.8700000000003,"sku":204},{"d":"18/10","v":"Hasaki TMS Internal","s":[4,0,1,0,0,0,0,0,0,0,0,0,0,0,0],"ma":5,"t":144.59000000000003,"sku":18},{"d":"18/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"18/10","v":"(khong co NVC)","s":[78,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":2756.1799999999994,"sku":219},{"d":"19/10","v":"Hasaki Now","s":[3011,704,869,220,599,0,196,80,13,2,10,0,0,0,0],"ma":4781,"t":1875824500.0,"sku":14474},{"d":"19/10","v":"Giao Hang Nhanh","s":[14,127,293,230,290,0,4,20,37,0,0,2,0,0,0],"ma":634,"t":360493000.0,"sku":2881},{"d":"19/10","v":"Shopee Express","s":[5,123,220,233,313,0,0,23,36,0,2,1,0,0,0],"ma":568,"t":389416500.0,"sku":3571},{"d":"19/10","v":"Hasaki Pickup","s":[192,5,0,7,5,0,0,0,0,0,0,0,0,0,0],"ma":5,"t":786930000.0,"sku":1103},{"d":"19/10","v":"TMS Easy Post","s":[0,0,19,0,0,0,0,0,0,0,0,0,0,0,0],"ma":19,"t":654.99,"sku":82},{"d":"19/10","v":"TMS Easy Ship","s":[0,0,24,3,0,0,0,0,0,0,0,0,0,0,0],"ma":26,"t":1076.8000000000002,"sku":126},{"d":"19/10","v":"Hasaki TMS Internal","s":[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":3,"t":80.72999999999999,"sku":8},{"d":"19/10","v":"Hasaki TMS Gateway","s":[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":24.89,"sku":2},{"d":"19/10","v":"(khong co NVC)","s":[63,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":2459.8499999999995,"sku":213},{"d":"20/10","v":"Hasaki Now","s":[25,82,144,505,146,0,105,45,23,0,8,1,0,0,0],"ma":496,"t":382238000.0,"sku":2718},{"d":"20/10","v":"Giao Hang Nhanh","s":[0,11,0,115,10,0,0,20,4,0,2,0,0,0,0],"ma":27,"t":49518000.0,"sku":334},{"d":"20/10","v":"Shopee Express","s":[0,12,1,125,5,0,0,10,5,0,0,1,0,0,0],"ma":13,"t":62335000.0,"sku":409},{"d":"20/10","v":"Hasaki Pickup","s":[10,0,0,0,0,0,0,1,0,0,0,0,0,0,0],"ma":1,"t":10377000.0,"sku":42},{"d":"20/10","v":"TMS Easy Post","s":[0,0,0,1,1,0,0,0,0,0,0,0,0,0,0],"ma":2,"t":112.37,"sku":14},{"d":"20/10","v":"TMS Easy Ship","s":[0,0,2,1,5,0,0,0,1,0,0,0,0,0,0],"ma":9,"t":246.07000000000002,"sku":31},{"d":"20/10","v":"Hasaki TMS Internal","s":[2,0,0,1,3,0,0,0,0,0,0,0,0,0,0],"ma":6,"t":138.93,"sku":19},{"d":"20/10","v":"Hasaki TMS Gateway","s":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":0.0,"sku":0},{"d":"20/10","v":"(khong co NVC)","s":[31,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ma":0,"t":1233.34,"sku":104}],"shop":[{"n":"170 QUOC LO 1A","tong":15986,"m":[[358,8687,502,176,1144,176,223,164,344,250,0,0],[122,1503,84,53,60,54,84,50,61,56,45,3],[2,532,13,9,39,24,35,62,169,261,78,0],[0,18,1,2,1,4,1,5,3,30,82,35],[0,0,0,0,1,0,1,1,2,0,0,0],[7,220,8,1,6,1,0,0,0,0,0,0],[0,4,0,0,0,0,1,2,0,2,3,0],[0,0,0,0,0,0,0,1,0,1,6,0],[0,3,0,0,0,0,0,0,1,1,33,0],[9,56,4,3,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,2,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"81 HO TUNG MAU","tong":2385,"m":[[103,632,89,94,102,121,202,164,111,93,120,0],[35,144,24,31,24,58,35,14,20,9,21,1],[0,4,1,2,1,2,1,6,3,3,5,0],[3,7,0,1,0,4,2,3,4,6,6,10],[1,0,0,0,0,0,1,1,1,1,1,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,2,2,6,3,3,3,3,20,9],[0,0,0,0,0,0,0,0,0,0,0,2],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"276 XO VIET NGHE TINH","tong":2361,"m":[[115,700,71,91,94,134,203,137,164,92,110,0],[27,155,22,19,11,23,21,22,19,12,13,4],[0,2,0,0,0,2,1,2,4,3,16,4],[2,8,0,2,1,3,3,5,1,0,5,14],[0,0,0,0,0,0,0,0,0,0,0,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,1,8,8],[0,0,0,0,0,0,0,0,0,0,0,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"167 NGUYEN XI","tong":2244,"m":[[118,745,72,42,78,84,136,96,123,89,61,0],[41,238,16,17,21,14,27,17,16,17,10,0],[2,17,1,0,1,5,2,1,10,7,3,0],[1,13,2,0,0,1,10,4,2,3,0,1],[0,2,0,0,0,0,0,0,1,1,3,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,6,0,0,0,1,0,0,7,9,31,15],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"274 GO XOAI","tong":2032,"m":[[68,639,23,21,61,83,132,34,56,54,28,2],[59,503,22,1,16,12,54,13,4,14,7,1],[0,27,1,1,5,0,0,4,3,13,17,7],[1,7,1,0,0,0,2,1,0,2,1,5],[0,1,0,0,0,0,0,1,0,3,3,3],[0,15,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"2857 LUONG DINH CUA","tong":1997,"m":[[109,1155,63,42,40,40,41,32,20,17,4,0],[28,207,14,10,10,4,9,5,4,4,3,0],[0,43,3,0,5,2,4,5,7,10,3,2],[0,7,1,0,0,1,1,0,0,1,2,4],[0,0,0,0,0,0,1,1,0,7,16,2],[2,5,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"261 LE QUANG DINH","tong":1943,"m":[[125,589,62,56,64,125,162,119,35,123,94,1],[30,94,18,15,29,10,33,13,6,13,17,4],[0,4,1,1,2,2,1,1,0,1,20,3],[4,9,3,2,1,2,1,8,0,5,2,13],[0,1,0,0,0,0,1,0,0,1,6,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,2,7],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"185 NGUYEN TRAI","tong":1905,"m":[[93,493,59,54,56,108,167,113,104,97,85,0],[29,197,20,26,24,15,20,12,17,9,15,2],[0,6,2,0,1,1,1,0,1,4,15,1],[1,2,4,1,0,2,7,2,3,1,3,7],[0,0,0,0,0,0,0,0,0,0,3,3],[0,0,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,1,2,0,0,2,3,2,8],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"1207 NGUYEN DUY TRINH","tong":1899,"m":[[74,989,8,27,33,27,34,20,19,21,9,0],[57,371,11,8,6,16,11,5,4,8,3,2],[0,24,2,0,2,2,2,1,9,4,1,0],[0,11,0,0,2,0,1,1,1,6,3,5],[1,9,0,0,2,1,1,2,7,10,9,4],[0,11,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0,0,0]]},{"n":"296 LANH BINH THANG","tong":1886,"m":[[151,473,44,24,43,79,161,85,86,76,76,3],[113,235,25,21,13,39,24,29,3,9,5,0],[0,3,0,3,0,1,1,0,1,1,21,0],[3,9,0,0,0,1,2,0,0,0,5,9],[0,0,0,0,0,0,0,0,0,0,6,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"79 XUAN LA","tong":1883,"m":[[43,637,70,33,38,44,48,7,10,8,3,0],[226,433,20,14,19,21,27,6,5,4,10,0],[6,26,4,3,13,6,8,10,10,3,0,0],[0,2,0,0,5,1,0,0,1,22,23,3],[0,0,0,0,0,0,0,0,0,0,0,0],[1,7,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,3,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"342 LE VAN SY","tong":1825,"m":[[103,686,37,45,45,92,56,84,100,86,74,0],[22,202,16,19,12,15,13,11,10,9,12,0],[0,14,0,0,2,2,3,0,5,5,13,1],[5,10,1,0,0,1,0,1,0,1,0,0],[0,1,0,1,1,0,0,0,1,2,1,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"402 LE DUC THO","tong":1818,"m":[[96,564,34,39,58,73,109,75,79,87,59,1],[36,190,4,6,45,58,53,21,10,7,17,0],[2,17,0,1,3,6,3,2,5,7,14,0],[1,6,0,0,0,0,3,1,1,0,2,4],[0,1,0,0,0,0,1,0,0,0,3,4],[0,2,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,2,2,0,0],[0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"311 TAY THANH","tong":1792,"m":[[79,289,185,30,46,87,125,64,36,47,47,3],[170,87,10,11,178,160,57,10,3,4,5,1],[0,10,1,0,4,0,4,0,2,4,12,1],[1,6,2,0,1,2,0,1,1,0,0,3],[0,0,0,0,0,0,0,0,0,0,1,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"432 CACH MANG THANG 8","tong":1790,"m":[[88,492,59,68,60,78,170,112,108,111,71,0],[17,107,13,17,18,18,29,9,14,15,11,2],[0,2,2,0,1,0,1,0,0,6,42,4],[0,2,5,4,0,1,1,2,2,2,6,6],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,8],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,5],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"723 CACH MANG THANG TAM","tong":1777,"m":[[74,631,49,27,37,57,152,122,79,44,73,0],[34,204,14,11,13,26,14,14,14,6,16,0],[0,6,3,1,1,3,1,0,3,0,10,1],[1,2,1,0,1,2,1,4,1,1,2,3],[0,0,0,0,0,0,0,0,0,3,1,4],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,7],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"477 LE VAN THO","tong":1726,"m":[[31,625,12,19,28,30,74,39,40,34,17,0],[30,502,17,6,3,11,37,16,6,11,20,0],[0,23,0,0,2,2,1,1,3,4,4,0],[3,8,0,0,1,0,2,2,3,1,6,3],[0,6,0,0,0,0,0,0,9,6,15,1],[0,1,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0,7,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"251 THOI HOA","tong":1704,"m":[[49,388,205,8,99,76,103,18,19,18,29,0],[142,258,65,5,14,23,49,8,7,4,10,0],[0,22,0,0,0,1,4,1,6,8,8,6],[1,8,0,1,0,1,7,1,1,1,2,21],[0,0,0,0,0,0,0,0,0,0,1,0],[0,6,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"94 HAU GIANG","tong":1614,"m":[[72,598,29,21,35,47,112,62,62,49,51,1],[23,292,13,11,11,19,32,11,6,8,2,1],[0,3,0,1,0,1,2,0,3,7,14,1],[1,4,0,0,0,0,1,0,0,0,0,5],[0,1,0,0,0,0,0,0,0,2,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"392 NGUYEN VAN QUA","tong":1597,"m":[[80,560,11,19,30,79,88,39,28,36,6,0],[41,388,14,3,7,15,22,17,4,4,3,1],[0,18,1,0,2,1,1,4,3,2,2,0],[0,8,0,0,0,0,0,1,0,1,3,4],[13,5,0,0,0,0,0,1,1,10,13,4],[0,2,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"76 PHAN VAN HON","tong":1578,"m":[[116,422,140,20,160,84,141,50,12,5,0,0],[20,189,24,3,22,8,12,37,1,0,2,0],[0,14,0,0,1,1,4,1,0,5,6,0],[1,9,0,0,0,0,0,0,0,0,0,7],[0,6,0,0,0,0,1,0,2,7,19,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,17,4,0,1,0,0,0,0,2,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"726 HUYNH TAN PHAT","tong":1572,"m":[[55,691,15,21,22,69,53,34,35,32,27,0],[14,323,28,9,5,3,4,2,4,5,6,1],[1,26,1,0,2,3,6,0,12,15,5,0],[0,1,0,0,0,1,1,0,0,1,3,2],[0,0,0,0,0,0,1,0,2,0,6,2],[0,20,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"219 NGUYEN THI THAP","tong":1534,"m":[[100,485,45,35,43,80,131,92,88,70,69,1],[26,104,17,7,9,9,17,13,17,7,6,1],[0,4,0,0,0,0,0,0,0,2,9,2],[0,4,3,2,1,4,1,2,1,0,0,2],[0,0,0,0,0,0,0,0,0,0,0,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,1,0,1,0,15,6],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"133 HIEP BINH","tong":1521,"m":[[87,449,91,33,83,76,127,77,64,61,50,0],[9,125,12,7,7,8,24,12,15,10,11,0],[0,12,0,1,0,1,5,2,0,4,2,0],[1,7,0,3,0,2,4,1,0,0,8,5],[0,2,0,0,1,0,0,0,2,4,6,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,8,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"276 QUANG TRUNG","tong":1520,"m":[[95,672,52,30,39,50,42,10,10,0,1,2],[27,150,4,11,15,13,19,4,12,6,13,0],[0,12,5,9,20,25,21,19,18,6,0,0],[1,9,2,1,0,2,0,0,0,9,32,5],[0,0,0,0,0,0,0,0,9,11,7,0],[1,9,0,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,1,0,0],[1,3,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]}],"huy":[{"k":"Ecom","v":27522},{"k":"Khách hủy","v":15716},{"k":"Tách đơn","v":2701},{"k":"Không có hoá đơn VAT","v":174},{"k":"Hết hàng","v":13},{"k":"Khách tự lấy","v":1}],"tre":[{"k":"Không","v":183763},{"k":"Chờ hủy đơn","v":36091},{"k":"Chờ chuyển hàng","v":5438},{"k":"Chờ xác nhận","v":232},{"k":"Chờ CS","v":110},{"k":"Không trả lời","v":88},{"k":"(de trong)","v":10},{"k":"Chờ trả lời","v":4},{"k":"Khu vực bị khóa","v":2}],"ut":[{"k":"GHN","v":104315},{"k":"NOW 48h","v":99574},{"k":"NOW 2h","v":20614},{"k":"(khong co)","v":1234},{"k":"NOW 24h","v":1}],"lydo":["Không","Chờ hủy đơn","Chờ chuyển hàng","Không trả lời","Chờ xác nhận","(de trong)","Chờ trả lời"],"proc":[{"d":"09/10","v":"Hasaki Now","l":[0,127,0,0,0,0,0]},{"d":"09/10","v":"Giao Hang Nhanh","l":[1,0,0,0,0,0,0]},{"d":"09/10","v":"Shopee Express","l":[0,0,0,0,0,0,0]},{"d":"09/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"09/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"09/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"09/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"09/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"09/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"10/10","v":"Hasaki Now","l":[3,432,6,1,0,0,0]},{"d":"10/10","v":"Giao Hang Nhanh","l":[41,14,9,5,0,0,0]},{"d":"10/10","v":"Shopee Express","l":[71,6,13,1,1,0,0]},{"d":"10/10","v":"Hasaki Pickup","l":[1,0,0,0,0,0,0]},{"d":"10/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"10/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"10/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"10/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"10/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"11/10","v":"Hasaki Now","l":[0,66,1,0,0,0,0]},{"d":"11/10","v":"Giao Hang Nhanh","l":[1,0,4,0,0,0,0]},{"d":"11/10","v":"Shopee Express","l":[7,0,1,0,0,0,0]},{"d":"11/10","v":"Hasaki Pickup","l":[0,0,0,0,1,0,0]},{"d":"11/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"11/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"11/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"11/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"11/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"12/10","v":"Hasaki Now","l":[0,46,0,0,0,0,0]},{"d":"12/10","v":"Giao Hang Nhanh","l":[1,0,2,0,0,0,0]},{"d":"12/10","v":"Shopee Express","l":[11,0,1,1,1,0,0]},{"d":"12/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"12/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"12/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"12/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"12/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"12/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"13/10","v":"Hasaki Now","l":[0,42,0,0,0,0,0]},{"d":"13/10","v":"Giao Hang Nhanh","l":[8,0,1,0,0,0,0]},{"d":"13/10","v":"Shopee Express","l":[19,0,1,0,0,0,0]},{"d":"13/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"13/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"13/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"13/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"13/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"13/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"14/10","v":"Hasaki Now","l":[2,84,0,1,0,0,0]},{"d":"14/10","v":"Giao Hang Nhanh","l":[5,0,5,0,0,0,0]},{"d":"14/10","v":"Shopee Express","l":[15,0,2,2,0,0,0]},{"d":"14/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"14/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"14/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"14/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"14/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"14/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"15/10","v":"Hasaki Now","l":[0,111,0,3,0,0,0]},{"d":"15/10","v":"Giao Hang Nhanh","l":[5,0,3,0,0,0,0]},{"d":"15/10","v":"Shopee Express","l":[10,0,5,1,0,0,0]},{"d":"15/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"15/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"15/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"15/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"15/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"15/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"16/10","v":"Hasaki Now","l":[1,82,2,0,1,0,0]},{"d":"16/10","v":"Giao Hang Nhanh","l":[4,0,9,1,0,0,0]},{"d":"16/10","v":"Shopee Express","l":[4,0,0,0,0,0,0]},{"d":"16/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"16/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"16/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"16/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"16/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"16/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"17/10","v":"Hasaki Now","l":[1,66,1,0,1,0,0]},{"d":"17/10","v":"Giao Hang Nhanh","l":[5,0,3,1,0,0,0]},{"d":"17/10","v":"Shopee Express","l":[11,0,4,1,0,0,0]},{"d":"17/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"17/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"17/10","v":"TMS Easy Ship","l":[0,0,0,0,0,0,0]},{"d":"17/10","v":"Hasaki TMS Internal","l":[1,0,0,0,0,0,0]},{"d":"17/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"17/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"18/10","v":"Hasaki Now","l":[21,35,15,1,0,0,1]},{"d":"18/10","v":"Giao Hang Nhanh","l":[30,0,18,4,0,1,0]},{"d":"18/10","v":"Shopee Express","l":[33,0,25,2,0,1,0]},{"d":"18/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"18/10","v":"TMS Easy Post","l":[3,0,0,0,0,0,0]},{"d":"18/10","v":"TMS Easy Ship","l":[1,0,0,0,0,0,0]},{"d":"18/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"18/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"18/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"19/10","v":"Hasaki Now","l":[159,27,26,2,6,0,0]},{"d":"19/10","v":"Giao Hang Nhanh","l":[140,0,81,6,2,1,0]},{"d":"19/10","v":"Shopee Express","l":[166,0,65,1,0,1,0]},{"d":"19/10","v":"Hasaki Pickup","l":[4,0,0,0,0,0,3]},{"d":"19/10","v":"TMS Easy Post","l":[0,0,0,0,0,0,0]},{"d":"19/10","v":"TMS Easy Ship","l":[1,0,1,0,1,0,0]},{"d":"19/10","v":"Hasaki TMS Internal","l":[0,0,0,0,0,0,0]},{"d":"19/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,1,0,0]},{"d":"19/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]},{"d":"20/10","v":"Hasaki Now","l":[481,0,20,3,1,0,0]},{"d":"20/10","v":"Giao Hang Nhanh","l":[97,0,18,0,0,0,0]},{"d":"20/10","v":"Shopee Express","l":[111,0,13,0,0,1,0]},{"d":"20/10","v":"Hasaki Pickup","l":[0,0,0,0,0,0,0]},{"d":"20/10","v":"TMS Easy Post","l":[1,0,0,0,0,0,0]},{"d":"20/10","v":"TMS Easy Ship","l":[1,0,0,0,0,0,0]},{"d":"20/10","v":"Hasaki TMS Internal","l":[1,0,0,0,0,0,0]},{"d":"20/10","v":"Hasaki TMS Gateway","l":[0,0,0,0,0,0,0]},{"d":"20/10","v":"(khong co NVC)","l":[0,0,0,0,0,0,0]}],"procShop":[{"n":"170 QUOC LO 1A","tong":15986,"m":[[0,8,0,0,0,1,0,0,1,3,14,23],[0,3,0,0,0,0,0,0,0,0,0,0],[0,4,0,2,1,2,1,4,1,21,61,12],[0,3,0,0,0,1,0,1,1,6,7,0],[0,0,1,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"276 QUANG TRUNG","tong":1520,"m":[[0,8,2,1,0,1,0,0,0,6,30,4],[1,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,3,2,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"79 XUAN LA","tong":1883,"m":[[0,1,0,0,4,1,0,0,1,22,23,3],[0,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"67 THU Y","tong":574,"m":[[0,5,1,0,3,4,4,1,2,16,12,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,2],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"261 LE QUANG DINH","tong":1943,"m":[[0,0,0,0,0,0,0,0,0,0,1,13],[4,8,3,2,1,2,1,8,0,4,0,0],[0,1,0,0,0,0,0,0,0,1,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"81 HO TUNG MAU","tong":2385,"m":[[0,0,0,0,0,0,0,0,0,0,5,10],[3,7,0,1,0,4,2,2,4,4,0,0],[0,0,0,0,0,0,0,1,0,1,1,0],[0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"251 THOI HOA","tong":1704,"m":[[0,2,0,0,0,0,0,0,0,1,2,20],[1,6,0,1,0,1,6,1,0,0,0,0],[0,0,0,0,0,0,0,0,1,0,0,1],[0,0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"276 XO VIET NGHE TINH","tong":2361,"m":[[0,0,0,0,0,0,0,0,0,0,5,14],[2,7,0,2,1,3,3,5,1,0,0,0],[0,1,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"167 NGUYEN XI","tong":2244,"m":[[0,0,0,0,0,0,0,0,0,0,0,1],[1,13,2,0,0,1,8,4,2,3,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,2,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"919 HAU GIANG","tong":1482,"m":[[0,0,0,0,0,0,0,0,0,0,0,21],[1,4,0,1,1,1,4,1,1,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"363 TO NGOC VAN","tong":865,"m":[[0,0,0,0,0,0,0,0,0,1,3,13],[1,12,1,1,0,0,0,2,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"568 LUY BAN BICH","tong":1363,"m":[[0,3,0,1,0,0,0,0,0,1,1,4],[3,0,0,0,0,0,0,1,1,0,0,0],[0,2,0,0,0,0,0,2,0,3,5,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,2,2,1],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"185 NGUYEN TRAI","tong":1905,"m":[[0,0,0,0,0,0,0,0,0,0,2,7],[1,2,4,1,0,2,7,2,3,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"321 CAU GIAY","tong":633,"m":[[0,0,0,0,0,1,0,0,0,0,27,3],[0,0,0,0,0,1,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]},{"n":"531 DO XUAN HOP","tong":960,"m":[[0,0,0,0,0,0,0,0,0,0,1,14],[0,7,1,0,1,0,2,1,3,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]}],"procTon":[{"t":0,"l":[692,0,51,3,1,1,0]},{"t":1,"l":[470,27,173,9,10,2,3]},{"t":2,"l":[88,35,58,7,0,2,1]},{"t":3,"l":[18,66,8,2,1,0,0]},{"t":4,"l":[9,82,11,1,1,0,0]},{"t":5,"l":[15,111,8,4,0,0,0]},{"t":6,"l":[22,84,7,3,0,0,0]},{"t":7,"l":[27,42,2,0,0,0,0]},{"t":8,"l":[12,46,3,1,1,0,0]},{"t":9,"l":[8,66,6,0,1,0,0]},{"t":10,"l":[116,452,28,7,1,0,0]},{"t":11,"l":[1,127,0,0,0,0,0]}]}</script>
+<script>
+(function(){
+  "use strict";
+  var D = JSON.parse(document.getElementById('payload').textContent);
+  var css = function(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+  var HEAT = ['--h0','--h1','--h2','--h3','--h4','--h5','--h6','--h7'];
+  var fmt = function(n){ return (n||0).toLocaleString('vi-VN'); };
+  var pct1 = function(a,b){ return b ? (a/b*100).toLocaleString('vi-VN',{maximumFractionDigits:1})+'%' : '—'; };
+  var tien = function(n){
+    if(n>=1e9) return (n/1e9).toLocaleString('vi-VN',{maximumFractionDigits:1})+' tỷ';
+    if(n>=1e6) return (n/1e6).toLocaleString('vi-VN',{maximumFractionDigits:0})+' tr';
+    return fmt(Math.round(n));
+  };
+  var NVC_LABEL = {'(khong co NVC)':'(không có NVC)','Giao Hang Nhanh':'Giao Hàng Nhanh'};
+  var lbl = function(v){ return NVC_LABEL[v] || v; };
+  var NS = D.status.length;
+
+  var state = { day:'all', nvc:'all', shopStatus:0 };
+  var charts = {};
+
+  function rows(){
+    return D.cell.filter(function(c){
+      return (state.day==='all' || c.d===state.day) && (state.nvc==='all' || c.v===state.nvc);
+    });
+  }
+  function sumS(list){
+    var o=new Array(NS).fill(0);
+    list.forEach(function(c){ for(var i=0;i<NS;i++) o[i]+=c.s[i]; });
+    return o;
+  }
+  function tot(list,key){ var s=0; list.forEach(function(c){ s+=c[key]; }); return s; }
+  function sumAll(a){ return a.reduce(function(x,y){return x+y;},0); }
+
+  /* ---------- filters ---------- */
+  function buildChips(el, items, labels, key){
+    el.innerHTML='';
+    items.forEach(function(v,i){
+      var b=document.createElement('button');
+      b.type='button'; b.className='chip'; b.textContent=labels[i];
+      b.setAttribute('aria-pressed', String(state[key]===v));
+      b.addEventListener('click', function(){
+        state[key]=v;
+        el.querySelectorAll('.chip').forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+        b.setAttribute('aria-pressed','true');
+        render();
+      });
+      el.appendChild(b);
+    });
+  }
+
+  /* ---------- headline + strip ---------- */
+  function renderHead(){
+    var r=rows(), s=sumS(r), all=sumAll(s), ma=tot(r,'ma');
+    document.getElementById('head3').innerHTML =
+      '<div><span class="k">Tổng shipment</span><span class="v">'+fmt(all)+'</span><span class="d">'+fmt(tot(r,'sku'))+' sản phẩm</span></div>'+
+      '<div><span class="k">Đã gán mã vận đơn</span><span class="v">'+pct1(ma,all)+'</span><span class="d">'+fmt(ma)+' shipment</span></div>'+
+      '<div><span class="k">Tiền shipment</span><span class="v">'+tien(tot(r,'t'))+'</span><span class="d">VNĐ</span></div>';
+
+    var mx=Math.max.apply(null,s)||1;
+    document.getElementById('strip').innerHTML = D.status.map(function(name,i){
+      var w=Math.round(Math.sqrt(s[i]/mx)*100);
+      return '<div class="st'+(s[i]===0?' zero':'')+'"><span class="n" title="'+name+'">'+name+'</span>'+
+        '<span class="v">'+fmt(s[i])+'</span> <span class="p">'+pct1(s[i],all)+'</span>'+
+        '<div class="track"><div class="fill" style="width:'+w+'%"></div></div></div>';
+    }).join('');
+  }
+
+  /* ---------- heatmap ---------- */
+  function heatLevel(v,mx){
+    if(v===0) return 0;
+    var t=Math.sqrt(v/mx);
+    return Math.min(7, Math.max(1, Math.ceil(t*7)));
+  }
+  function buildHeat(elId, rowLabels, matrix, rowNote, colLabels, unit){
+    var cols = colLabels || D.status;
+    var u = unit || 'shipment';
+    var mx=0;
+    matrix.forEach(function(row){ row.forEach(function(v){ if(v>mx) mx=v; }); });
+    if(!mx) mx=1;
+    var html='<thead><tr><th class="rowh">'+rowNote+'</th>'+
+      cols.map(function(s){ return '<th>'+s+'</th>'; }).join('')+'<th>Tổng</th></tr></thead><tbody>';
+    matrix.forEach(function(row,ri){
+      html+='<tr><th class="rowh">'+rowLabels[ri]+'</th>'+
+        row.map(function(v,ci){
+          var L=heatLevel(v,mx);
+          var fg = L>=5 ? 'var(--heat-ink-hi)' : 'var(--heat-ink-lo)';
+          return '<td style="background:var('+HEAT[L]+');color:'+(v===0?'var(--ink-3)':fg)+'" title="'+
+            rowLabels[ri]+' · '+cols[ci]+': '+fmt(v)+' '+u+'">'+(v===0?'–':fmt(v))+'</td>';
+        }).join('')+
+        '<th style="text-align:right;color:var(--ink-2);font-weight:600">'+fmt(sumAll(row))+'</th></tr>';
+    });
+    html+='</tbody>';
+    document.getElementById(elId).innerHTML=html;
+  }
+  function renderHeat(){
+    var m1=D.days.map(function(d){
+      return D.status.map(function(_,i){
+        return D.cell.filter(function(c){ return c.d===d && (state.nvc==='all'||c.v===state.nvc); })
+                     .reduce(function(a,c){ return a+c.s[i]; },0);
+      });
+    });
+    buildHeat('hm1', D.days, m1, 'Ngày');
+    document.getElementById('n1').textContent =
+      state.nvc==='all' ? 'Tất cả đơn vị vận chuyển. Màu đậm hơn = nhiều shipment hơn.' : 'Lọc theo: '+lbl(state.nvc)+'.';
+
+    var list=D.nvc.filter(function(v){
+      return D.cell.some(function(c){ return c.v===v && (state.day==='all'||c.d===state.day) && sumAll(c.s)>0; });
+    });
+    var m2=list.map(function(v){
+      return D.status.map(function(_,i){
+        return D.cell.filter(function(c){ return c.v===v && (state.day==='all'||c.d===state.day); })
+                     .reduce(function(a,c){ return a+c.s[i]; },0);
+      });
+    });
+    buildHeat('hm2', list.map(lbl), m2, 'Đơn vị vận chuyển');
+    document.getElementById('n2').textContent =
+      state.day==='all' ? 'Toàn kỳ 09–20/10. Màu đậm hơn = nhiều shipment hơn.' : 'Lọc theo ngày tạo: '+state.day+'.';
+  }
+  function procRows(){
+    return D.proc.filter(function(c){
+      return (state.day==='all' || c.d===state.day) && (state.nvc==='all' || c.v===state.nvc);
+    });
+  }
+  function renderProc(){
+    if(!D.proc) return;
+    var LY=D.lydo, r=procRows();
+    var tot=new Array(LY.length).fill(0);
+    r.forEach(function(c){ for(var i=0;i<LY.length;i++) tot[i]+=c.l[i]; });
+    var all=sumAll(tot), mx=Math.max.apply(null,tot)||1;
+    document.getElementById('stripP').innerHTML = LY.map(function(name,i){
+      var w=Math.round(Math.sqrt(tot[i]/mx)*100);
+      return '<div class="st'+(tot[i]===0?' zero':'')+'"><span class="n" title="'+name+'">'+name+'</span>'+
+        '<span class="v">'+fmt(tot[i])+'</span> <span class="p">'+pct1(tot[i],all)+'</span>'+
+        '<div class="track"><div class="fill" style="width:'+w+'%"></div></div></div>';
+    }).join('');
+    document.getElementById('np').textContent =
+      fmt(all)+' đơn đang ở processing' +
+      (state.day==='all' ? '' : ', ngày tạo '+state.day) +
+      (state.nvc==='all' ? '' : ', đơn vị vận chuyển '+lbl(state.nvc)) + '.';
+
+    var m1=D.days.map(function(d){
+      return LY.map(function(_,i){
+        return D.proc.filter(function(c){ return c.d===d && (state.nvc==='all'||c.v===state.nvc); })
+                     .reduce(function(a,c){ return a+c.l[i]; },0);
+      });
+    });
+    buildHeat('hmP1', D.days, m1, 'Ngày', LY, 'đơn');
+
+    var list=D.nvc.filter(function(v){
+      return D.proc.some(function(c){ return c.v===v && (state.day==='all'||c.d===state.day) && sumAll(c.l)>0; });
+    });
+    var m2=list.map(function(v){
+      return LY.map(function(_,i){
+        return D.proc.filter(function(c){ return c.v===v && (state.day==='all'||c.d===state.day); })
+                     .reduce(function(a,c){ return a+c.l[i]; },0);
+      });
+    });
+    if(!list.length){ list=['(không có đơn)']; m2=[LY.map(function(){return 0;})]; }
+    buildHeat('hmP2', list.map(lbl), m2, 'Đơn vị vận chuyển', LY, 'đơn');
+
+    buildHeat('hmP3', D.procTon.map(function(x){ return x.t+' ngày'; }),
+      D.procTon.map(function(x){ return x.l; }), 'Số ngày tồn', LY, 'đơn');
+
+    var di = state.day==='all' ? -1 : D.days.indexOf(state.day);
+    var sh = D.procShop.map(function(s){
+      return {n:s.n, row: LY.map(function(_,i){ return di<0 ? sumAll(s.m[i]) : s.m[i][di]; })};
+    }).filter(function(s){ return sumAll(s.row)>0; })
+      .sort(function(a,b){ return sumAll(b.row)-sumAll(a.row); });
+    if(!sh.length){ sh=[{n:'(không có đơn)',row:LY.map(function(){return 0;})}]; }
+    buildHeat('hmP4', sh.map(function(s){return s.n;}), sh.map(function(s){return s.row;}), 'Cửa hàng', LY, 'đơn');
+  }
+
+  function renderRamp(){
+    [['r1'],['r2'],['rP']].forEach(function(p){
+      document.getElementById(p[0]).innerHTML =
+        HEAT.slice(1).map(function(h){ return '<i style="background:var('+h+')"></i>'; }).join('');
+    });
+  }
+
+  /* ---------- charts ---------- */
+  function barOpts(fmtTip, xTick){
+    return {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index', intersect:false},
+      indexAxis:'y',
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:css('--surface'), titleColor:css('--ink'), bodyColor:css('--ink-2'),
+          borderColor:css('--rule'), borderWidth:1, padding:10, cornerRadius:6,
+          titleFont:{family:'Be Vietnam Pro',weight:'600',size:12.5},
+          bodyFont:{family:'Be Vietnam Pro',size:12.5},
+          callbacks:{ label:fmtTip }
+        }
+      },
+      scales:{
+        x:{grid:{color:css('--grid'),drawTicks:false}, border:{display:false},
+           ticks:{color:css('--ink-3'), font:{family:'Be Vietnam Pro',size:11.5}, callback:xTick}},
+        y:{grid:{display:false}, border:{color:css('--rule')},
+           ticks:{color:css('--ink-2'), font:{family:'Be Vietnam Pro',size:11}}}
+      }
+    };
+  }
+  function draw(id,cfg){
+    if(charts[id]) charts[id].destroy();
+    charts[id]=new Chart(document.getElementById(id).getContext('2d'), cfg);
+  }
+
+  function chartMa(){
+    var list=D.nvc.filter(function(v){
+      return D.cell.some(function(c){ return c.v===v && (state.day==='all'||c.d===state.day) && sumAll(c.s)>0; });
+    });
+    var vals=list.map(function(v){
+      var f=D.cell.filter(function(c){ return c.v===v && (state.day==='all'||c.d===state.day); });
+      var all=f.reduce(function(a,c){ return a+sumAll(c.s); },0);
+      var ma=f.reduce(function(a,c){ return a+c.ma; },0);
+      return all ? +(ma/all*100).toFixed(1) : 0;
+    });
+    var o=barOpts(function(c){ return ' '+c.parsed.x.toLocaleString('vi-VN',{maximumFractionDigits:1})+'% đã gán mã'; },
+                  function(v){ return v+'%'; });
+    o.scales.x.max=100;
+    draw('c3',{type:'bar',
+      data:{labels:list.map(lbl),datasets:[{label:'Đã gán mã',data:vals,
+        backgroundColor:css('--s1'), borderRadius:{topRight:4,bottomRight:4}, borderSkipped:false}]},
+      options:o});
+  }
+
+  function chartShop(){
+    var si=state.shopStatus;
+    var di=state.day==='all' ? -1 : D.days.indexOf(state.day);
+    var arr=D.shop.map(function(s){
+      var row=s.m[si];
+      return {n:s.n, v: di<0 ? sumAll(row) : row[di], tong:s.tong};
+    }).filter(function(s){ return s.v>0; })
+      .sort(function(a,b){ return b.v-a.v; }).slice(0,15);
+    if(!arr.length) arr=[{n:'(không có dữ liệu)',v:0,tong:0}];
+    draw('c4',{type:'bar',
+      data:{labels:arr.map(function(s){return s.n;}),
+        datasets:[{label:'Shipment',data:arr.map(function(s){return s.v;}),
+          backgroundColor:css('--s1'), borderRadius:{topRight:4,bottomRight:4}, borderSkipped:false}]},
+      options:barOpts(function(c){
+        var s=arr[c.dataIndex];
+        return [' '+D.status[si]+': '+fmt(s.v), ' Tổng shipment cửa hàng: '+fmt(s.tong)];
+      }, function(v){ return fmt(v); })});
+  }
+
+  function simpleBar(id, data, color){
+    draw(id,{type:'bar',
+      data:{labels:data.map(function(x){return x.k;}),
+        datasets:[{label:'Shipment',data:data.map(function(x){return x.v;}),
+          backgroundColor:css(color), borderRadius:{topRight:4,bottomRight:4}, borderSkipped:false}]},
+      options:barOpts(function(c){ return ' '+fmt(c.parsed.x)+' shipment'; }, function(v){ return fmt(v); })});
+  }
+
+  /* ---------- table ---------- */
+  function renderTable(){
+    document.getElementById('thead').innerHTML =
+      '<tr><th>Ngày</th><th>Đơn vị vận chuyển</th>'+
+      D.status.map(function(s){return '<th>'+s+'</th>';}).join('')+
+      '<th>Tổng</th><th>Có mã VĐ</th></tr>';
+    var r=rows().filter(function(c){ return sumAll(c.s)>0; });
+    document.getElementById('tbody').innerHTML = r.map(function(c){
+      return '<tr><td>'+c.d+'</td><td>'+lbl(c.v)+'</td>'+
+        c.s.map(function(x){ return '<td'+(x===0?' class="muted"':'')+'>'+(x===0?'–':fmt(x))+'</td>'; }).join('')+
+        '<td><strong>'+fmt(sumAll(c.s))+'</strong></td><td>'+fmt(c.ma)+'</td></tr>';
+    }).join('');
+    var ts=D.status.map(function(_,i){ return r.reduce(function(a,c){ return a+c.s[i]; },0); });
+    document.getElementById('tfoot').innerHTML =
+      '<tr><td>Tổng</td><td></td>'+ts.map(function(x){return '<td>'+fmt(x)+'</td>';}).join('')+
+      '<td>'+fmt(sumAll(ts))+'</td><td>'+fmt(tot(r,'ma'))+'</td></tr>';
+    document.getElementById('n5').textContent =
+      r.length+' dòng. Mỗi dòng là một tổ hợp ngày × đơn vị vận chuyển; cột “Có mã VĐ” đếm shipment đã được gán mã vận đơn.';
+  }
+
+  function render(){ renderHead(); renderHeat(); renderProc(); chartMa(); chartShop(); renderTable(); }
+
+  function init(){
+    document.getElementById('src').textContent =
+      'Nguồn: ' + D.meta.file + ' · ' + fmt(D.meta.tong) + ' shipment / ' + fmt(D.meta.don) +
+      ' mã đơn · ' + fmt(D.meta.shop) + ' cửa hàng · export ' + D.meta.export;
+    buildChips(document.getElementById('f-day'), ['all'].concat(D.days), ['Tất cả'].concat(D.days), 'day');
+    buildChips(document.getElementById('f-nvc'), ['all'].concat(D.nvc), ['Tất cả'].concat(D.nvc.map(lbl)), 'nvc');
+    renderRamp();
+    var sel=document.getElementById('selStatus');
+    sel.innerHTML = D.status.map(function(s,i){ return '<option value="'+i+'">'+s+'</option>'; }).join('');
+    sel.value='0';
+    sel.addEventListener('change', function(){ state.shopStatus=+sel.value; chartShop(); });
+    document.getElementById('n6').textContent =
+      'Toàn kỳ, ' + fmt(D.huy.reduce(function(a,x){return a+x.v;},0)) + ' shipment đã hủy.';
+    document.getElementById('n7').textContent =
+      'Độ ưu tiên: ' + D.ut.map(function(x){ return (x.k==='(khong co)'?'(trống)':x.k)+' '+fmt(x.v); }).join(' · ') + '.';
+    document.getElementById('foot').textContent =
+      'Số liệu là ảnh chụp tại thời điểm export ' + D.meta.export +
+      '. Ngày 20/10 mới có dữ liệu đến 09:01 sáng. Khung export 09–20/10. Hai biểu đồ lý do hủy / lý do trễ tính trên toàn kỳ và không đổi theo bộ lọc.';
+    simpleBar('c5', D.huy, '--s2');
+    simpleBar('c6', D.tre.filter(function(x){return x.k!=='Không';}), '--s2');
+    render();
+  }
+
+  if(window.Chart){ init(); }
+  else { window.addEventListener('load', function(){ if(window.Chart) init(); }); }
+
+  var redrawAll = function(){
+    setTimeout(function(){
+      if(!window.Chart) return;
+      render();
+      simpleBar('c5', D.huy, '--s2');
+      simpleBar('c6', D.tre.filter(function(x){return x.k!=='Không';}), '--s2');
+    }, 60);
+  };
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  if(mq.addEventListener) mq.addEventListener('change', redrawAll);
+  new MutationObserver(redrawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
+
+</body>
+</html>
